@@ -1,10 +1,12 @@
 package model;
 
+import javax.persistence.Id;
 import java.util.List;
 import java.util.UUID;
 
 public class Group {
 
+    @Id
     private String id;
 
     private String name;

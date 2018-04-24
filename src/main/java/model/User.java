@@ -1,5 +1,6 @@
 package model;
 
+import javax.persistence.Id;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,6 +8,7 @@ public class User {
 
     private String password;
 
+    @Id
     private String username;
 
     private String name;
