@@ -2,21 +2,14 @@ package rest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mongodb.MongoClient;
-import com.mongodb.MongoClientURI;
-import com.mongodb.client.MongoDatabase;
 import model.User;
-import model.UserDatabase;
+import dbClasses.UserDatabase;
 import org.bson.Document;
-import org.jboss.resteasy.annotations.Form;
 
 import javax.ejb.LocalBean;
-import javax.ejb.Startup;
 import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ejb.Stateless;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import java.util.ArrayList;
 

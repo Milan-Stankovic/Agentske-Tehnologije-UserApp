@@ -1,4 +1,4 @@
-package model;
+package dbClasses;
 
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
