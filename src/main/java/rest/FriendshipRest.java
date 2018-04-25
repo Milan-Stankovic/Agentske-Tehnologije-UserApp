@@ -66,7 +66,7 @@ public class FriendshipRest implements FriendshipRestRemote {
         if(found==null){
             return Response.status(Response.Status.NOT_FOUND).entity(new ErrorDTO("Friendship not found.")).build();
         }else{
-            friendDatabase.getCollection().deleteOne(found);
+            friendDatabase.getCollection().deleteOne(found);//check delete method on mongodb
 
             //TODO notify appropriate node for friendship withdrawal
 
@@ -92,7 +92,7 @@ public class FriendshipRest implements FriendshipRestRemote {
             Document updateBSON = new Document();
             updateBSON.put("status", toUpdate.getStatus());
 
-            friendDatabase.getCollection().updateOne(found,new Document("$set", updateBSON));
+            friendDatabase.getCollection().updateOne(found,new Document("$set", updateBSON));//ckeck update method on mongodb
 
             //TODO notify appropriate node for friendship acceptance
 
