@@ -11,7 +11,6 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 
 @LocalBean
-@Path("/users")
 @Stateless
 public class GroupRest implements GroupRestRemote {
 

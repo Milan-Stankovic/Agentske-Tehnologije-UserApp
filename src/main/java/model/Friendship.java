@@ -1,6 +1,11 @@
 package model;
 
+import javax.persistence.Id;
+
 public class Friendship {
+
+    @Id
+    private String id;
 
     private String sender;
 

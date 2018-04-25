@@ -1,6 +1,10 @@
 package model;
 
+import javax.persistence.Id;
+
 public class Host {
+    @Id
+    private String id;
     private String address;
     private String alias;
 

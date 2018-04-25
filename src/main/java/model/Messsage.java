@@ -1,9 +1,11 @@
 package model;
 
+import javax.persistence.Id;
 import java.util.Date;
 
 public class Messsage {
 
+    @Id
     private String id;
     private String sender;
     private String reciver;
