@@ -69,7 +69,8 @@
     <orderEntry type="module-library">
       <library name="Maven: sun.jdk:jconsole:jdk">
         <CLASSES>
-          <root url="jar://C:/Program Files/Java/jdk1.8.0_152/lib/jconsole.jar!/" />
+            <root url="jar://$APPLICATION_CONFIG_DIR$/jdks/jbsdk8u112b287.2_windows_x64/lib/jconsole.jar!/" />
+         <!-- <root url="jar://C:/Program Files/Java/jdk1.8.0_152/lib/jconsole.jar!/" /> -->
         </CLASSES>
         <JAVADOC />
         <SOURCES />
