@@ -24,8 +24,16 @@ public class GroupRest implements GroupRestRemote {
     @Path("/group/{groupId}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Group getGroup(@PathParam("groupId") String groupId) {
-        return null;
+    public Response getGroup(@PathParam("groupId") String groupId) {
+        Document searchBy = new Document();
+        searchBy.put("id", groupId);
+
+        Document found = (Document)groupDatabase.getCollection().find(searchBy).first();
+        if(found == null){
+            return Response.status(Response.Status.NOT_FOUND).entity(new ErrorDTO("Group not found.")).build();
+        }else{
+            return Response.status(Response.Status.OK).entity(found).build();
+        }
     }
 
     @POST
