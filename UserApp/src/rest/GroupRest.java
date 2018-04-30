@@ -114,10 +114,7 @@ public class GroupRest implements GroupRestRemote {
         if(found==null){
             return Response.status(Response.Status.NOT_FOUND).entity(new ErrorDTO("Group not found.")).build();
         }else{
-            groupDatabase.getCollection().updateOne(//check whatever this is
-                    new Document(),
-                    new Document("$pull", new Document("id", new Document("$in", userId)))
-            );
+            groupDatabase.getCollection().deleteOne(found);
 
             //TODO notify other users about user that left
 
