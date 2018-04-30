@@ -15,6 +15,7 @@ import javax.ejb.LocalBean;
 import javax.ejb.Stateful;
 import javax.inject.Inject;
 import javax.ws.rs.*;
+import javax.ws.rs.client.Entity;
 import javax.ejb.Stateless;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -42,8 +43,8 @@ public class UserRest implements UserRestRemote {
     }
     
     
-    
-    @POST
+   /* 
+    @PUT
     @Path("/addActive/{userName}/ip/{ip}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
@@ -78,6 +79,8 @@ public class UserRest implements UserRestRemote {
     	return returnMessage;
     }
     
+    */
+    
 
     @POST
     @Path("/login")
@@ -101,8 +104,8 @@ public class UserRest implements UserRestRemote {
             			ResteasyClient client = new ResteasyClientBuilder().build();
         				
         				ResteasyWebTarget target = client.target(
-        						"http://" + temp.getHostIp() + ":8096/UserApp/users/addActive/"+temp.getUsername() +"/ip/"+user.getHostIp());
-        				
+        						"http://" + temp.getHostIp() + ":8096/ChatApp/users/addActive/"+temp.getUsername() +"/ip/"+user.getHostIp());
+            			
         				Response response = target.request(MediaType.APPLICATION_JSON).get();
             			String alive = response.readEntity(String.class);
             		/*	if(alive!=null & alive != "") {
@@ -118,10 +121,17 @@ public class UserRest implements UserRestRemote {
             	}
             	
                 activeUsers.add(user);
-                s="LOGGEDIN";
-
                 
-                //PROSLEDI SVIM CHATAPPOVIMA
+                
+                ResteasyClient client = new ResteasyClientBuilder().build();
+				
+				ResteasyWebTarget target = client.target(
+						"http://" + user.getHostIp() + ":8096/ChatApp/users/addAllUsers/");
+				
+				Response response = target.request().post(Entity.entity(activeUsers, "application/vnd.com.demo.user-management.user+xml;charset=UTF-8;version=1"));
+			// Nemam pojma da li ce ono raditi xD
+                
+                s="LOGGEDIN";
             }
 
         }
@@ -142,7 +152,17 @@ public class UserRest implements UserRestRemote {
                 if(temp.getUsername().equals(user.getUsername())){
                     activeUsers.remove(user);
                     s="LOGGEDOUT";
-                    //PROSLEDIM SVIM CHATAPPOVIMA
+                    for (User temp2 : activeUsers) {
+						
+            			ResteasyClient client = new ResteasyClientBuilder().build();
+        				
+        				ResteasyWebTarget target = client.target(
+        						"http://" + temp.getHostIp() + ":8096/ChatApp/users/removeActive/"+temp.getUsername() +"/ip/"+user.getHostIp());
+
+        				Response response = target.request(MediaType.APPLICATION_JSON).delete();
+            			String alive = response.readEntity(String.class);
+            
+					}
                     break;
                 }
             }
