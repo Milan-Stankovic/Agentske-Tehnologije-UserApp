@@ -12,6 +12,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -81,7 +82,7 @@ public class GroupRest implements GroupRestRemote {
                     ResteasyClient client = new ResteasyClientBuilder().build();
         			ResteasyWebTarget target = client.target(
         					"http://" + hostIp + ":8096/ChatApp/notify/"+u.getUsername()+"/notifyNewGroup");
-        			Response response1 = target.request(MediaType.APPLICATION_JSON).get();
+        			Response response1 = target.request(MediaType.APPLICATION_JSON).post(Entity.entity(toCreate, MediaType.APPLICATION_JSON));
                 }
                 //notifying
                 return Response.status(Response.Status.OK).entity(toCreate).build();
@@ -111,7 +112,7 @@ public class GroupRest implements GroupRestRemote {
                 ResteasyClient client = new ResteasyClientBuilder().build();
     			ResteasyWebTarget target = client.target(
     					"http://" + hostIp + ":8096/ChatApp/notify/"+u.getUsername()+"/notifyEndGroup");
-    			Response response1 = target.request(MediaType.APPLICATION_JSON).get();
+    			Response response1 = target.request(MediaType.APPLICATION_JSON).post(Entity.entity(toDelete, MediaType.APPLICATION_JSON));
             }
 
             return Response.status(Response.Status.OK).entity(toDelete).build();
@@ -151,7 +152,7 @@ public class GroupRest implements GroupRestRemote {
                 ResteasyClient client = new ResteasyClientBuilder().build();
     			ResteasyWebTarget target = client.target(
     					"http://" + hostIp + ":8096/ChatApp/notify/"+u.getUsername()+"/notifyNewGroupMember");
-    			Response response1 = target.request(MediaType.APPLICATION_JSON).get();
+    			Response response1 = target.request(MediaType.APPLICATION_JSON).post(Entity.entity(found, MediaType.APPLICATION_JSON));
             }
             
             String hostIp = toAdd.getHostIp();
@@ -199,7 +200,7 @@ public class GroupRest implements GroupRestRemote {
                     ResteasyClient client = new ResteasyClientBuilder().build();
         			ResteasyWebTarget target = client.target(
         					"http://" + hostIp + ":8096/ChatApp/notify/"+u.getUsername()+"/notifyRemovedUser");
-        			Response response1 = target.request(MediaType.APPLICATION_JSON).get();
+        			Response response1 = target.request(MediaType.APPLICATION_JSON).post(Entity.entity(found, MediaType.APPLICATION_JSON));
                 }
                 //notifying
 	

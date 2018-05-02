@@ -9,6 +9,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -65,7 +66,7 @@ public class FriendshipRest implements FriendshipRestRemote {
                 ResteasyClient client = new ResteasyClientBuilder().build();
 				ResteasyWebTarget target = client.target(
 						"http://" + hostIp + ":8096/ChatApp/notify/"+(String)foundReciver.get("username")+"/notifyFriendshipStart");
-				Response response = target.request(MediaType.APPLICATION_JSON).get();
+				Response response = target.request(MediaType.APPLICATION_JSON).post(Entity.entity(newFriendship, MediaType.APPLICATION_JSON));
                 //notfying
 
                 return Response.status(Response.Status.OK).entity(newFriendship).build();
@@ -100,14 +101,14 @@ public class FriendshipRest implements FriendshipRestRemote {
             ResteasyClient client = new ResteasyClientBuilder().build();
 			ResteasyWebTarget target = client.target(
 					"http://" + hostIp + ":8096/ChatApp/notify/"+(String)foundReciver.get("username")+"/notifyFriendshipEnd");
-			Response response = target.request(MediaType.APPLICATION_JSON).get();
+			Response response = target.request(MediaType.APPLICATION_JSON).post(Entity.entity(toDelete, MediaType.APPLICATION_JSON));
 			
 			hostIp = (String)foundSender.get("hostIp");
             
             ResteasyClient client1 = new ResteasyClientBuilder().build();
 			ResteasyWebTarget target1 = client.target(
 					"http://" + hostIp + ":8096/ChatApp/notify/"+(String)foundSender.get("username")+"/notifyFriendshipEnd");
-			Response response1 = target.request(MediaType.APPLICATION_JSON).get();
+			Response response1 = target.request(MediaType.APPLICATION_JSON).post(Entity.entity(toDelete, MediaType.APPLICATION_JSON));
             //notifying
 
             return Response.status(Response.Status.OK).entity(toDelete).build();
@@ -142,7 +143,7 @@ public class FriendshipRest implements FriendshipRestRemote {
             ResteasyClient client = new ResteasyClientBuilder().build();
 			ResteasyWebTarget target = client.target(
 					"http://" + hostIp + ":8096/ChatApp/notify/"+(String)foundSender.get("username")+"/notifyFriendshipStateChange");
-			Response response1 = target.request(MediaType.APPLICATION_JSON).get();
+			Response response1 = target.request(MediaType.APPLICATION_JSON).post(Entity.entity(toUpdate, MediaType.APPLICATION_JSON));
             //notifying
 
             return Response.status(Response.Status.OK).entity(toUpdate).build();
