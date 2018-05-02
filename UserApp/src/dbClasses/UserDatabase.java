@@ -24,7 +24,7 @@ public class UserDatabase {
         MongoClientURI uri = new MongoClientURI(dbUri);
         MongoClient mongoClient = new MongoClient(uri);
         MongoDatabase database = mongoClient.getDatabase("Agenti1");
-        collection = database.getCollection("users");
+        collection = database.getCollection("Users");
     }
 
     public MongoCollection getCollection(){

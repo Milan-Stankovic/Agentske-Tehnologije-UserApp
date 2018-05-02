@@ -14,8 +14,6 @@ public class User {
     private String name;
 
     private String lastName;
-
-    private List<Friendship> friends;
     
     private String hostIp; 
 
@@ -71,12 +69,8 @@ public class User {
         this.lastName = lastName;
     }
 
-    public List<Friendship> getFriends() {
-        return friends;
-    }
-
-    public void setFriends(List<Friendship> friends) {
-        this.friends = friends;
+    public User() {
+    	
     }
 
     public User(String username, String password){
@@ -84,7 +78,6 @@ public class User {
         this.username = username;
         this.password = password;
         this.hostIp = null;
-        friends= new ArrayList<Friendship>();
     }
 
     public User(String username, String password, String host){
@@ -100,34 +93,9 @@ public class User {
         f.setReciever(reciverUsername);
         f.setSender(this.username);
         f.setStatus(FriendshipStatus.PENDING);
-        friends.add(f);
         return f;
     }
 
-    public void acceptFriendship(String sender){
-        for (Friendship f:friends) {
-            if(f.getReciever().equals(this.username))
-                if(f.getSender().equals(sender))
-                    if(f.getStatus()==FriendshipStatus.PENDING)
-                        f.setStatus(FriendshipStatus.ACCEPTED);
-        }
-
-    }
-
-    public void declineFriendship(String sender) {
-        for (Friendship f : friends) {
-            if (f.getReciever().equals(this.username))
-                if (f.getSender().equals(sender))
-                    if (f.getStatus() == FriendshipStatus.PENDING)
-                        f.setStatus(FriendshipStatus.DECLINED);
-
-        }
-    }
-
-    public void addFriendship(Friendship f){
-        friends.add(f);
-
-    }
 
 
 

@@ -18,17 +18,22 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import dbClasses.FriendshipDatabase;
+import dbClasses.UserDatabase;
 import model.Friendship;
 import rest.dto.ErrorDTO;
 
 @LocalBean
+@Path("/")
 @Stateless
 public class FriendshipRest implements FriendshipRestRemote {
     @Inject
     FriendshipDatabase friendDatabase;
+    
+    @Inject
+    UserDatabase userDatabase;
 
     @POST
-    @Path("/friendship")
+    @Path("friendship")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response createFriendship(Friendship newFriendship)
@@ -36,18 +41,19 @@ public class FriendshipRest implements FriendshipRestRemote {
         Document searchBy = new Document();
         searchBy.append("sender", newFriendship.getSender());
         searchBy.append("reciever", newFriendship.getReciever());
-
-        Document found = (Document) friendDatabase.getCollection().find(searchBy).first();
         
-     
-
-        if(found!=null){
-            return Response.status(Response.Status.CONFLICT).entity(new ErrorDTO("Friendship entry already exists.")).build();
+        Document found = (Document) friendDatabase.getCollection().find(searchBy).first();
+        Document foundSender = (Document) userDatabase.getCollection().find(new Document("username", newFriendship.getSender())).first();
+        Document foundReciver = (Document) userDatabase.getCollection().find(new Document("username", newFriendship.getReciever())).first();   
+        
+        if(found!=null||foundSender==null||foundReciver==null){
+            return Response.status(Response.Status.CONFLICT).entity(new ErrorDTO("Friendship entry already exists. Or nonexistant users.")).build();
         }
         else{
             ObjectMapper mapper = new ObjectMapper();
             String json = null;
             try {
+            	System.out.println("Upisujem u bazu prijatelja.");
                 json = mapper.writeValueAsString(newFriendship);
                 friendDatabase.getCollection().insertOne(Document.parse(json));
 
