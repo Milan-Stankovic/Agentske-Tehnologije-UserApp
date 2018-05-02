@@ -53,7 +53,6 @@ public class FriendshipRest implements FriendshipRestRemote {
             ObjectMapper mapper = new ObjectMapper();
             String json = null;
             try {
-            	System.out.println("Upisujem u bazu prijatelja.");
                 json = mapper.writeValueAsString(newFriendship);
                 friendDatabase.getCollection().insertOne(Document.parse(json));
 
@@ -108,7 +107,7 @@ public class FriendshipRest implements FriendshipRestRemote {
             updateBSON.put("status", toUpdate.getStatus().toString());
             System.out.println("Updejtujem ga na: "+updateBSON);
 
-            friendDatabase.getCollection().updateOne(found,new Document("$set", updateBSON));//ckeck update method on mongodb
+            friendDatabase.getCollection().updateOne(found,new Document("$set", updateBSON));
 
             //TODO notify appropriate node for friendship acceptance
 

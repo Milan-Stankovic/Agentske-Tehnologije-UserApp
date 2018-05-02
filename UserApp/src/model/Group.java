@@ -13,24 +13,37 @@ public class Group {
 
     private List<User> users;
     
-    private User admin;
+    private String admin;	
+    
+    
 
-    public Group(String name){
+    public Group() {
+		super();
+	}
+
+    
+
+
+	public Group(String name){
         this.name=name;
         this.id = UUID.randomUUID().toString();
     }
     
-    
+	
 
-    public User getAdmin() {
+
+
+	public String getAdmin() {
 		return admin;
 	}
 
 
 
-	public void setAdmin(User admin) {
+
+	public void setAdmin(String admin) {
 		this.admin = admin;
 	}
+
 
 
 

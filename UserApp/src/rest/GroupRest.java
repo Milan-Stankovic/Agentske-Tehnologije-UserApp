@@ -1,24 +1,41 @@
 package rest;
 
-import dbClasses.GroupDatabase;
-import model.Group;
-import model.User;
-import org.bson.Document;
-import rest.dto.ErrorDTO;
+import java.util.ArrayList;
 
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.bson.Document;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import dbClasses.GroupDatabase;
+import dbClasses.UserDatabase;
+import model.Group;
+import model.User;
+import rest.dto.ErrorDTO;
+
 @LocalBean
+@Path("/groups")
 @Stateless
 public class GroupRest implements GroupRestRemote {
 
     @Inject
     GroupDatabase groupDatabase;
+    
+    @Inject
+    UserDatabase userDatabase;
 
     @GET
     @Path("/group/{groupId}")
@@ -45,14 +62,25 @@ public class GroupRest implements GroupRestRemote {
         searchBy.put("id", toCreate.getId());
 
         Document found = (Document)groupDatabase.getCollection().find(searchBy).first();
-        if(found != null){
-            return Response.status(Response.Status.CONFLICT).entity(new ErrorDTO("Group already exists.")).build();
+        Document foundAdmin = (Document) userDatabase.getCollection().find(new Document("username", toCreate.getAdmin())).first();
+        if(found != null||foundAdmin==null){
+            return Response.status(Response.Status.CONFLICT).entity(new ErrorDTO("Group already exists. Or admin doesnt exist.")).build();
         }else{
-            groupDatabase.getCollection().insertOne(toCreate);
 
-            //TODO notify group participants about group creation
+            //TODO notify group participants about group creation           
+                        
+            ObjectMapper mapper = new ObjectMapper();
+            String json = null;
+            try {
+                json = mapper.writeValueAsString(toCreate);
+                groupDatabase.getCollection().insertOne(Document.parse(json));
 
-            return Response.status(Response.Status.OK).entity(toCreate).build();
+                //TODO notify appropriate node for friendship request
+
+                return Response.status(Response.Status.OK).entity(toCreate).build();
+            } catch (JsonProcessingException e) {
+                return Response.status(Response.Status.BAD_REQUEST).entity(new ErrorDTO("Error while parsing JSON.")).build();
+            }
         }
     }
 
@@ -90,9 +118,31 @@ public class GroupRest implements GroupRestRemote {
         if(found==null){
             return Response.status(Response.Status.NOT_FOUND).entity(new ErrorDTO("Group not found.")).build();
         }else{
+        	/*ObjectMapper mapper = new ObjectMapper();
+            try {
+            	ArrayList<User> temp = (ArrayList<User>)found.get("users");
+            	temp.add(toAdd);
+            	//found.put("users", temp);
+                String json = mapper.writeValueAsString(temp);
+                
+                Document updateBSON = new Document();
+                updateBSON.put("users", json);
+                groupDatabase.getCollection().updateOne(found,new Document("$set", updateBSON));
+            
+
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            }*/
+           
+        	Document updateBSON = new Document();
+            updateBSON.put("password", toAdd.getPassword());
+            updateBSON.put("username", toAdd.getUsername());
+            updateBSON.put("name", toAdd.getName());
+            updateBSON.put("lastName", toAdd.getLastName());
+            updateBSON.put("hostIp", toAdd.getHostIp());
             groupDatabase.getCollection().updateOne(//check whatever this is
-                    new Document(),
-                    new Document("$push", new Document("users", toAdd))
+            		found,
+                    new Document("$push", new Document("users", updateBSON))
             );
 
             //TODO notify other users about user that left

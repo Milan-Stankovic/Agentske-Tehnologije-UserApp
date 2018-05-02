@@ -87,14 +87,7 @@ public class User {
         this.hostIp = host;
 
     }
-
-    public Friendship sendFriendRequest(String reciverUsername){
-        Friendship f = new Friendship();
-        f.setReciever(reciverUsername);
-        f.setSender(this.username);
-        f.setStatus(FriendshipStatus.PENDING);
-        return f;
-    }
+    
 
 
 
