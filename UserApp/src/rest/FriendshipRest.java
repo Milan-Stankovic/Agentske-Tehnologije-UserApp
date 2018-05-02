@@ -77,8 +77,8 @@ public class FriendshipRest implements FriendshipRestRemote {
 
     }
 
-    @DELETE
-    @Path("friendship")
+    @POST
+    @Path("friendship/delete")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response deleteFriendship(Friendship toDelete) {
