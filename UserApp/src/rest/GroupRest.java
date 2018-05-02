@@ -92,8 +92,8 @@ public class GroupRest implements GroupRestRemote {
         }
     }
 
-    @DELETE
-    @Path("/group")
+    @POST
+    @Path("/group/delete")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response deleteGroup(Group toDelete) {
