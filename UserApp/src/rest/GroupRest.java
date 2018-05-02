@@ -155,7 +155,7 @@ public class GroupRest implements GroupRestRemote {
     @Path("/group/{groupId}/users/{userId}/sender/{sendingId}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response removeUser(@PathParam("groupId") String groupId, @PathParam("userId") String userId, @PathParam("sendingId") String sendingId) {//proveriti da li je admin
+    public Response removeUser(@PathParam("groupId") String groupId, @PathParam("userId") String userId, @PathParam("sendingId") String sendingId) {
     		Document searchBy = new Document();
 	        searchBy.put("id", groupId);
 	
@@ -166,9 +166,14 @@ public class GroupRest implements GroupRestRemote {
 	            return Response.status(Response.Status.NOT_FOUND).entity(new ErrorDTO("Group not found.")).build();
 	        }
         	else if(sendingId==userId||found.get("admin").equals(sendingId)){
-	            groupDatabase.getCollection().deleteOne(found);
 	
-	            //TODO notify other users about user that left
+	            Document updateBSON = new Document();
+	            updateBSON.put("username", userId);
+
+	            groupDatabase.getCollection().updateOne(//check whatever this is
+	            		found,
+	                    new Document("$pull", new Document("users", updateBSON))
+	            );
 	
 	            return Response.status(Response.Status.OK).entity(found).build();//check if u need to return found or something else
 	        }
