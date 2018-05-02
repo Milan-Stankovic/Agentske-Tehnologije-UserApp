@@ -16,6 +16,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.bson.Document;
+import org.jboss.resteasy.client.jaxrs.ResteasyClient;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -65,18 +68,22 @@ public class GroupRest implements GroupRestRemote {
         Document foundAdmin = (Document) userDatabase.getCollection().find(new Document("username", toCreate.getAdmin())).first();
         if(found != null||foundAdmin==null){
             return Response.status(Response.Status.CONFLICT).entity(new ErrorDTO("Group already exists. Or admin doesnt exist.")).build();
-        }else{
-
-            //TODO notify group participants about group creation           
-                        
+        }else{                             
             ObjectMapper mapper = new ObjectMapper();
             String json = null;
             try {
                 json = mapper.writeValueAsString(toCreate);
                 groupDatabase.getCollection().insertOne(Document.parse(json));
-
-                //TODO notify appropriate node for friendship request
-
+                //notifying
+                for(User u:toCreate.getUsers()) {
+                	String hostIp = u.getHostIp();
+                    
+                    ResteasyClient client = new ResteasyClientBuilder().build();
+        			ResteasyWebTarget target = client.target(
+        					"http://" + hostIp + ":8096/ChatApp/users/"+u.getUsername()+"/notifyNewGroup");
+        			Response response1 = target.request(MediaType.APPLICATION_JSON).get();
+                }
+                //notifying
                 return Response.status(Response.Status.OK).entity(toCreate).build();
             } catch (JsonProcessingException e) {
                 return Response.status(Response.Status.BAD_REQUEST).entity(new ErrorDTO("Error while parsing JSON.")).build();
@@ -96,9 +103,16 @@ public class GroupRest implements GroupRestRemote {
         if(found == null){
             return Response.status(Response.Status.NOT_FOUND).entity(new ErrorDTO("Group not found.")).build();
         }else{
-            groupDatabase.getCollection().deleteOne(found);//check delete method on mongodb
+            groupDatabase.getCollection().deleteOne(found);
 
-            //TODO notify group participants about group disbandment
+            for(User u:toDelete.getUsers()) {
+            	String hostIp = u.getHostIp();
+                
+                ResteasyClient client = new ResteasyClientBuilder().build();
+    			ResteasyWebTarget target = client.target(
+    					"http://" + hostIp + ":8096/ChatApp/users/"+u.getUsername()+"/notifyEndGroup");
+    			Response response1 = target.request(MediaType.APPLICATION_JSON).get();
+            }
 
             return Response.status(Response.Status.OK).entity(toDelete).build();
         }
@@ -119,23 +133,7 @@ public class GroupRest implements GroupRestRemote {
 
         if(found==null||foundUser==null){
             return Response.status(Response.Status.NOT_FOUND).entity(new ErrorDTO("Group or user not found.")).build();
-        }else{
-        	/*ObjectMapper mapper = new ObjectMapper();
-            try {
-            	ArrayList<User> temp = (ArrayList<User>)found.get("users");
-            	temp.add(toAdd);
-            	//found.put("users", temp);
-                String json = mapper.writeValueAsString(temp);
-                
-                Document updateBSON = new Document();
-                updateBSON.put("users", json);
-                groupDatabase.getCollection().updateOne(found,new Document("$set", updateBSON));
-            
-
-            } catch (JsonProcessingException e) {
-                e.printStackTrace();
-            }*/
-           
+        }else{          
         	Document updateBSON = new Document();
             updateBSON.put("password", toAdd.getPassword());
             updateBSON.put("username", toAdd.getUsername());
@@ -146,6 +144,22 @@ public class GroupRest implements GroupRestRemote {
             		found,
                     new Document("$push", new Document("users", updateBSON))
             );
+            
+            for(User u:(ArrayList<User>)found.get("users")) {
+            	String hostIp = u.getHostIp();
+                
+                ResteasyClient client = new ResteasyClientBuilder().build();
+    			ResteasyWebTarget target = client.target(
+    					"http://" + hostIp + ":8096/ChatApp/users/"+u.getUsername()+"/notifyNewGroupMember");
+    			Response response1 = target.request(MediaType.APPLICATION_JSON).get();
+            }
+            
+            String hostIp = toAdd.getHostIp();
+            
+            ResteasyClient client = new ResteasyClientBuilder().build();
+			ResteasyWebTarget target = client.target(
+					"http://" + hostIp + ":8096/ChatApp/users/"+toAdd.getUsername()+"/notifyNewGroupMember");
+			Response response1 = target.request(MediaType.APPLICATION_JSON).get();
 
             //TODO notify other users about user that left
 
@@ -173,12 +187,23 @@ public class GroupRest implements GroupRestRemote {
 	            Document updateBSON = new Document();
 	            updateBSON.put("username", userId);
 
-	            groupDatabase.getCollection().updateOne(//check whatever this is
+	            groupDatabase.getCollection().updateOne(
 	            		found,
 	                    new Document("$pull", new Document("users", updateBSON))
 	            );
+	            
+	            //notifying
+                for(User u:(ArrayList<User>)found.get("users")) {
+                	String hostIp = u.getHostIp();
+                    
+                    ResteasyClient client = new ResteasyClientBuilder().build();
+        			ResteasyWebTarget target = client.target(
+        					"http://" + hostIp + ":8096/ChatApp/users/"+u.getUsername()+"/notifyRemovedUser");
+        			Response response1 = target.request(MediaType.APPLICATION_JSON).get();
+                }
+                //notifying
 	
-	            return Response.status(Response.Status.OK).entity(found).build();//check if u need to return found or something else
+	            return Response.status(Response.Status.OK).entity(found).build();
 	        }
         	else {
         		return Response.status(Response.Status.NOT_FOUND).entity(new ErrorDTO("No authoriy")).build();
