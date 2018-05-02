@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 
 import model.User;
+import rest.dto.ErrorDTO;
 import dbClasses.UserDatabase;
 import org.bson.Document;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
@@ -80,6 +81,22 @@ public class UserRest implements UserRestRemote {
     }
     
     */
+    
+    
+    @GET
+    @Path("/getActive")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.TEXT_PLAIN)
+    public Response getActive(){
+    	
+    	
+    	 if(activeUsers.isEmpty())
+             return Response.status(Response.Status.NOT_FOUND).entity(new ErrorDTO("No users found.")).build();
+         
+             return Response.status(Response.Status.OK).entity(activeUsers).build();
+         
+    }
+    
     
 
     @POST
