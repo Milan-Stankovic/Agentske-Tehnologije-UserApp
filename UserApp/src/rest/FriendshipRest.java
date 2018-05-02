@@ -68,7 +68,7 @@ public class FriendshipRest implements FriendshipRestRemote {
     }
 
     @DELETE
-    @Path("/friendship")
+    @Path("friendship")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response deleteFriendship(Friendship toDelete) {
@@ -81,7 +81,7 @@ public class FriendshipRest implements FriendshipRestRemote {
         if(found==null){
             return Response.status(Response.Status.NOT_FOUND).entity(new ErrorDTO("Friendship not found.")).build();
         }else{
-            friendDatabase.getCollection().deleteOne(found);//check delete method on mongodb
+            friendDatabase.getCollection().deleteOne(found);
 
             //TODO notify appropriate node for friendship withdrawal
 
@@ -91,7 +91,7 @@ public class FriendshipRest implements FriendshipRestRemote {
     }
 
     @PUT
-    @Path("/friendship")
+    @Path("friendship")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response updateFriendshipStatus(Friendship toUpdate) {
@@ -105,7 +105,8 @@ public class FriendshipRest implements FriendshipRestRemote {
             return Response.status(Response.Status.NOT_FOUND).entity(new ErrorDTO("Friendship not found.")).build();
         }else{
             Document updateBSON = new Document();
-            updateBSON.put("status", toUpdate.getStatus());
+            updateBSON.put("status", toUpdate.getStatus().toString());
+            System.out.println("Updejtujem ga na: "+updateBSON);
 
             friendDatabase.getCollection().updateOne(found,new Document("$set", updateBSON));//ckeck update method on mongodb
 
