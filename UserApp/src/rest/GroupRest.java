@@ -114,9 +114,11 @@ public class GroupRest implements GroupRestRemote {
         searchBy.put("id", groupId);
 
         Document found = (Document) groupDatabase.getCollection().find(searchBy).first();
+        
+        Document foundUser = (Document) userDatabase.getCollection().find(new Document("username", toAdd.getUsername())).first();
 
-        if(found==null){
-            return Response.status(Response.Status.NOT_FOUND).entity(new ErrorDTO("Group not found.")).build();
+        if(found==null||foundUser==null){
+            return Response.status(Response.Status.NOT_FOUND).entity(new ErrorDTO("Group or user not found.")).build();
         }else{
         	/*ObjectMapper mapper = new ObjectMapper();
             try {
@@ -160,10 +162,11 @@ public class GroupRest implements GroupRestRemote {
 	        searchBy.put("id", groupId);
 	
 	        Document found = (Document) groupDatabase.getCollection().find(searchBy).first();
-	
+	        Document foundUser = (Document) userDatabase.getCollection().find(new Document("username", userId)).first();
+	        Document foundSender = (Document) userDatabase.getCollection().find(new Document("username", sendingId)).first();
 	        
-	        if(found==null){
-	            return Response.status(Response.Status.NOT_FOUND).entity(new ErrorDTO("Group not found.")).build();
+	        if(found==null||foundSender==null||foundUser==null){
+	            return Response.status(Response.Status.NOT_FOUND).entity(new ErrorDTO("Group, user or admin not found.")).build();
 	        }
         	else if(sendingId==userId||found.get("admin").equals(sendingId)){
 	
