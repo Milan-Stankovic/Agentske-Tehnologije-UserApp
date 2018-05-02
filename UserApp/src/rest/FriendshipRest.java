@@ -13,6 +13,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.bson.Document;
+import org.jboss.resteasy.client.jaxrs.ResteasyClient;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -56,7 +59,14 @@ public class FriendshipRest implements FriendshipRestRemote {
                 json = mapper.writeValueAsString(newFriendship);
                 friendDatabase.getCollection().insertOne(Document.parse(json));
 
-                //TODO notify appropriate node for friendship request
+                //notifying
+                String hostIp = (String)foundReciver.get("hostIp");
+                
+                ResteasyClient client = new ResteasyClientBuilder().build();
+				ResteasyWebTarget target = client.target(
+						"http://" + hostIp + ":8096/ChatApp/users/"+(String)foundReciver.get("username")+"/notifyFriendshipStart");
+				Response response = target.request(MediaType.APPLICATION_JSON).get();
+                //notfying
 
                 return Response.status(Response.Status.OK).entity(newFriendship).build();
             } catch (JsonProcessingException e) {
@@ -76,13 +86,29 @@ public class FriendshipRest implements FriendshipRestRemote {
         searchBy.append("reciever", toDelete.getReciever());
 
         Document found = (Document) friendDatabase.getCollection().find(searchBy).first();
+        Document foundSender = (Document) userDatabase.getCollection().find(new Document("username", toDelete.getSender())).first();
+        Document foundReciver = (Document) userDatabase.getCollection().find(new Document("username", toDelete.getReciever())).first();  
 
         if(found==null){
             return Response.status(Response.Status.NOT_FOUND).entity(new ErrorDTO("Friendship not found.")).build();
         }else{
             friendDatabase.getCollection().deleteOne(found);
 
-            //TODO notify appropriate node for friendship withdrawal
+            //notifying
+            String hostIp = (String)foundReciver.get("hostIp");
+            
+            ResteasyClient client = new ResteasyClientBuilder().build();
+			ResteasyWebTarget target = client.target(
+					"http://" + hostIp + ":8096/ChatApp/users/"+(String)foundReciver.get("username")+"/notifyFriendshipEnd");
+			Response response = target.request(MediaType.APPLICATION_JSON).get();
+			
+			hostIp = (String)foundSender.get("hostIp");
+            
+            ResteasyClient client1 = new ResteasyClientBuilder().build();
+			ResteasyWebTarget target1 = client.target(
+					"http://" + hostIp + ":8096/ChatApp/users/"+(String)foundSender.get("username")+"/notifyFriendshipEnd");
+			Response response1 = target.request(MediaType.APPLICATION_JSON).get();
+            //notifying
 
             return Response.status(Response.Status.OK).entity(toDelete).build();
         }
@@ -99,7 +125,8 @@ public class FriendshipRest implements FriendshipRestRemote {
         searchBy.append("reciever", toUpdate.getReciever());
 
         Document found = (Document) friendDatabase.getCollection().find(searchBy).first();
-
+        Document foundSender = (Document) userDatabase.getCollection().find(new Document("username", toUpdate.getSender())).first();
+        
         if(found==null){
             return Response.status(Response.Status.NOT_FOUND).entity(new ErrorDTO("Friendship not found.")).build();
         }else{
@@ -109,7 +136,14 @@ public class FriendshipRest implements FriendshipRestRemote {
 
             friendDatabase.getCollection().updateOne(found,new Document("$set", updateBSON));
 
-            //TODO notify appropriate node for friendship acceptance
+            //notifying
+            String hostIp = (String)foundSender.get("hostIp");
+            
+            ResteasyClient client = new ResteasyClientBuilder().build();
+			ResteasyWebTarget target = client.target(
+					"http://" + hostIp + ":8096/ChatApp/users/"+(String)foundSender.get("username")+"/notifyFriendshipEnd");
+			Response response1 = target.request(MediaType.APPLICATION_JSON).get();
+            //notifying
 
             return Response.status(Response.Status.OK).entity(toUpdate).build();
         }
