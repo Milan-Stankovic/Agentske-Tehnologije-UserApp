@@ -102,24 +102,29 @@ public class GroupRest implements GroupRestRemote {
     }
 
     @DELETE
-    @Path("/group/{groupId}/users/{userId}")
+    @Path("/group/{groupId}/users/{userId}/sender/{sendingId}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response removeUser(@PathParam("groupId") String groupId, @PathParam("userId") String userId) {
-        Document searchBy = new Document();
-        searchBy.put("id", groupId);
-
-        Document found = (Document) groupDatabase.getCollection().find(searchBy).first();
-
-        if(found==null){
-            return Response.status(Response.Status.NOT_FOUND).entity(new ErrorDTO("Group not found.")).build();
-        }else{
-            groupDatabase.getCollection().deleteOne(found);
-
-            //TODO notify other users about user that left
-
-            return Response.status(Response.Status.OK).entity(found).build();//check if u need to return found or something else
-        }
+    public Response removeUser(@PathParam("groupId") String groupId, @PathParam("userId") String userId, @PathParam("sendingId") String sendingId) {//proveriti da li je admin
+    		Document searchBy = new Document();
+	        searchBy.put("id", groupId);
+	
+	        Document found = (Document) groupDatabase.getCollection().find(searchBy).first();
+	
+	        
+	        if(found==null){
+	            return Response.status(Response.Status.NOT_FOUND).entity(new ErrorDTO("Group not found.")).build();
+	        }
+        	else if(sendingId==userId||found.get("admin").equals(sendingId)){
+	            groupDatabase.getCollection().deleteOne(found);
+	
+	            //TODO notify other users about user that left
+	
+	            return Response.status(Response.Status.OK).entity(found).build();//check if u need to return found or something else
+	        }
+        	else {
+        		return Response.status(Response.Status.NOT_FOUND).entity(new ErrorDTO("No authoriy")).build();
+        	}
     }
 
 

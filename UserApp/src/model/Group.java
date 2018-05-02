@@ -12,13 +12,29 @@ public class Group {
     private String name;
 
     private List<User> users;
+    
+    private User admin;
 
     public Group(String name){
         this.name=name;
         this.id = UUID.randomUUID().toString();
     }
+    
+    
 
-    public String getId() {
+    public User getAdmin() {
+		return admin;
+	}
+
+
+
+	public void setAdmin(User admin) {
+		this.admin = admin;
+	}
+
+
+
+	public String getId() {
         return id;
     }
 
