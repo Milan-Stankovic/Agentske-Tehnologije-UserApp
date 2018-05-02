@@ -1,9 +1,14 @@
 package model;
 
 import javax.persistence.Id;
-import java.util.Date;
 
-public class Messsage {
+import com.google.gson.Gson;
+import com.sun.mail.imap.protocol.UID;
+
+import java.util.Date;
+import java.util.UUID;
+
+public class Message {
 
     @Id
     private String id;
@@ -11,12 +16,37 @@ public class Messsage {
     private String reciver;
     private Date creationDate;
     private String content;
+    private String groupId="";
+    
+    
+    
+    
 
-    public Messsage() {
+    public String getGroupId() {
+		return groupId;
+	}
+
+	public void setGroupId(String groupId) {
+		this.groupId = groupId;
+	}
+
+
+	public Message() {
 
     }
+    
+    public Message(String text) {
+    	Gson test = new Gson();
+    	Message m = test.fromJson(text, Message.class);
+    	this.id= UUID.randomUUID().toString();
+    	this.sender=m.sender;
+    	this.reciver=m.reciver;
+    	this.creationDate= new Date();
+    	this.content=m.content;
+    	this.groupId=m.groupId;
+    }
 
-    public Messsage(String id, String sender, String reciver, Date creationDate, String content) {
+    public Message(String id, String sender, String reciver, Date creationDate, String content) {
         this.id = id;
         this.sender = sender;
         this.reciver = reciver;

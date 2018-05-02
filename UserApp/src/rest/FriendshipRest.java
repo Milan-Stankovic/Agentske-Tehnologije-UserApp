@@ -64,7 +64,7 @@ public class FriendshipRest implements FriendshipRestRemote {
                 
                 ResteasyClient client = new ResteasyClientBuilder().build();
 				ResteasyWebTarget target = client.target(
-						"http://" + hostIp + ":8096/ChatApp/users/"+(String)foundReciver.get("username")+"/notifyFriendshipStart");
+						"http://" + hostIp + ":8096/ChatApp/notify/"+(String)foundReciver.get("username")+"/notifyFriendshipStart");
 				Response response = target.request(MediaType.APPLICATION_JSON).get();
                 //notfying
 
@@ -99,14 +99,14 @@ public class FriendshipRest implements FriendshipRestRemote {
             
             ResteasyClient client = new ResteasyClientBuilder().build();
 			ResteasyWebTarget target = client.target(
-					"http://" + hostIp + ":8096/ChatApp/users/"+(String)foundReciver.get("username")+"/notifyFriendshipEnd");
+					"http://" + hostIp + ":8096/ChatApp/notify/"+(String)foundReciver.get("username")+"/notifyFriendshipEnd");
 			Response response = target.request(MediaType.APPLICATION_JSON).get();
 			
 			hostIp = (String)foundSender.get("hostIp");
             
             ResteasyClient client1 = new ResteasyClientBuilder().build();
 			ResteasyWebTarget target1 = client.target(
-					"http://" + hostIp + ":8096/ChatApp/users/"+(String)foundSender.get("username")+"/notifyFriendshipEnd");
+					"http://" + hostIp + ":8096/ChatApp/notify/"+(String)foundSender.get("username")+"/notifyFriendshipEnd");
 			Response response1 = target.request(MediaType.APPLICATION_JSON).get();
             //notifying
 
@@ -141,7 +141,7 @@ public class FriendshipRest implements FriendshipRestRemote {
             
             ResteasyClient client = new ResteasyClientBuilder().build();
 			ResteasyWebTarget target = client.target(
-					"http://" + hostIp + ":8096/ChatApp/users/"+(String)foundSender.get("username")+"/notifyFriendshipEnd");
+					"http://" + hostIp + ":8096/ChatApp/notify/"+(String)foundSender.get("username")+"/notifyFriendshipStateChange");
 			Response response1 = target.request(MediaType.APPLICATION_JSON).get();
             //notifying
 

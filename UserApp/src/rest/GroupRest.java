@@ -80,7 +80,7 @@ public class GroupRest implements GroupRestRemote {
                     
                     ResteasyClient client = new ResteasyClientBuilder().build();
         			ResteasyWebTarget target = client.target(
-        					"http://" + hostIp + ":8096/ChatApp/users/"+u.getUsername()+"/notifyNewGroup");
+        					"http://" + hostIp + ":8096/ChatApp/notify/"+u.getUsername()+"/notifyNewGroup");
         			Response response1 = target.request(MediaType.APPLICATION_JSON).get();
                 }
                 //notifying
@@ -110,7 +110,7 @@ public class GroupRest implements GroupRestRemote {
                 
                 ResteasyClient client = new ResteasyClientBuilder().build();
     			ResteasyWebTarget target = client.target(
-    					"http://" + hostIp + ":8096/ChatApp/users/"+u.getUsername()+"/notifyEndGroup");
+    					"http://" + hostIp + ":8096/ChatApp/notify/"+u.getUsername()+"/notifyEndGroup");
     			Response response1 = target.request(MediaType.APPLICATION_JSON).get();
             }
 
@@ -150,7 +150,7 @@ public class GroupRest implements GroupRestRemote {
                 
                 ResteasyClient client = new ResteasyClientBuilder().build();
     			ResteasyWebTarget target = client.target(
-    					"http://" + hostIp + ":8096/ChatApp/users/"+u.getUsername()+"/notifyNewGroupMember");
+    					"http://" + hostIp + ":8096/ChatApp/notify/"+u.getUsername()+"/notifyNewGroupMember");
     			Response response1 = target.request(MediaType.APPLICATION_JSON).get();
             }
             
@@ -158,7 +158,7 @@ public class GroupRest implements GroupRestRemote {
             
             ResteasyClient client = new ResteasyClientBuilder().build();
 			ResteasyWebTarget target = client.target(
-					"http://" + hostIp + ":8096/ChatApp/users/"+toAdd.getUsername()+"/notifyNewGroupMember");
+					"http://" + hostIp + ":8096/ChatApp/notify/"+toAdd.getUsername()+"/notifyNewGroupMember");
 			Response response1 = target.request(MediaType.APPLICATION_JSON).get();
 
             //TODO notify other users about user that left
@@ -198,7 +198,7 @@ public class GroupRest implements GroupRestRemote {
                     
                     ResteasyClient client = new ResteasyClientBuilder().build();
         			ResteasyWebTarget target = client.target(
-        					"http://" + hostIp + ":8096/ChatApp/users/"+u.getUsername()+"/notifyRemovedUser");
+        					"http://" + hostIp + ":8096/ChatApp/notify/"+u.getUsername()+"/notifyRemovedUser");
         			Response response1 = target.request(MediaType.APPLICATION_JSON).get();
                 }
                 //notifying
