@@ -5,5 +5,5 @@ import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 
 @ApplicationPath("/rest")
-public class Start extends Application {
+public class Start extends Application { 
 }
