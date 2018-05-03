@@ -76,17 +76,19 @@ public class PrimalacQueueMDB implements MessageListener {
 				//getGroup((Group)aclMessage.getContent());
 				break;
 			case NEW_GROUP:
-				System.out.println("Usao sam u NEW GROUP!!!");
+				
 				createGroup((Group)aclMessage.getContent());
 				break;
 			case DELETE_GROUP:
 				deleteGroup((Group)aclMessage.getContent());
 				break;
 			case ADD_USER:
+				System.out.println("Usao sam u NEW GROUP!!!");
 				addUser(aclMessage.getInfo(), (User)aclMessage.getContent());
 				break;
 			case REMOVE_USER_GROUP:
-				String[] niz = ((String)aclMessage.getContent()).split("----");
+				
+				String[] niz = ((String)aclMessage.getContent()).split("---");
 				removeUser(aclMessage.getInfo(), niz[0], niz[1]);
 				break;
 			case LOGIN:
@@ -305,7 +307,10 @@ public class PrimalacQueueMDB implements MessageListener {
                     new Document("$push", new Document("users", updateBSON))
             );
             
-            for(User u:(ArrayList<User>)found.get("users")) {
+            Gson gson = new Gson();
+    	     Group group = gson.fromJson(found.toJson(), Group.class);   
+            
+            for(User u:group.getUsers()) {
             	String hostIp = u.getHostIp();
                 
                 ResteasyClient client = new ResteasyClientBuilder().build();
@@ -323,7 +328,7 @@ public class PrimalacQueueMDB implements MessageListener {
 
             //TODO notify other users about user that left
 
-			new JMSQueue(new jmsDTO(toAdd.getUsername(), JMSStatus.ADD_USER, found));//TODO CHECK
+			new JMSQueue(new jmsDTO(groupId, JMSStatus.ADD_USER, found));//TODO CHECK
         }
     }
 	
@@ -348,8 +353,12 @@ public class PrimalacQueueMDB implements MessageListener {
                     new Document("$pull", new Document("users", updateBSON))
             );
             
+            Gson gson = new Gson();
+      	     Group group = gson.fromJson(found.toJson(), Group.class);   
+              
+            
             //notifying
-            for(User u:(ArrayList<User>)found.get("users")) {
+            for(User u:group.getUsers()) {
             	String hostIp = u.getHostIp();
                 
                 ResteasyClient client = new ResteasyClientBuilder().build();

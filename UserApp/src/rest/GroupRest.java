@@ -149,7 +149,10 @@ public class GroupRest implements GroupRestRemote {
                     new Document("$push", new Document("users", updateBSON))
             );
             
-            for(User u:(ArrayList<User>)found.get("users")) {
+            Gson gson = new Gson();
+   	     Group group = gson.fromJson(found.toJson(), Group.class);   
+           
+           for(User u:group.getUsers()) {
             	String hostIp = u.getHostIp();
                 
                 ResteasyClient client = new ResteasyClientBuilder().build();
@@ -195,9 +198,11 @@ public class GroupRest implements GroupRestRemote {
 	            		found,
 	                    new Document("$pull", new Document("users", updateBSON))
 	            );
-	            
+	            Gson gson = new Gson();
+	      	     Group group = gson.fromJson(found.toJson(), Group.class);   
+	              
 	            //notifying
-                for(User u:(ArrayList<User>)found.get("users")) {
+                for(User u:group.getUsers()) {
                 	String hostIp = u.getHostIp();
                     
                     ResteasyClient client = new ResteasyClientBuilder().build();
