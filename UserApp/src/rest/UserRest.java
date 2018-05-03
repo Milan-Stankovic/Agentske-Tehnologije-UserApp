@@ -33,8 +33,15 @@ public class UserRest implements UserRestRemote {
 
 
     private ArrayList<User> activeUsers = new ArrayList<User>();
+    
+    
 
-    @GET
+    public ArrayList<User> getActiveUsers() {
+		return activeUsers;
+	}
+
+
+	@GET
     @Path("/test")
     @Produces(MediaType.TEXT_PLAIN)
     public String Test(){
@@ -42,46 +49,7 @@ public class UserRest implements UserRestRemote {
 
         return "TEST!";
     }
-    
-    
-   /* 
-    @PUT
-    @Path("/addActive/{userName}/ip/{ip}")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.TEXT_PLAIN)
-    public String addActive(@PathParam("userName") String userName,@PathParam("ip")  String ip){ 
-    	String returnMessage="";
-    
-    	 Document found = (Document) userDatabase.getCollection().find(new Document("username", userName));
-    	 if(found != null) {
-    		  Gson gson = new Gson();
-    	      User person = gson.fromJson(found.toJson(), User.class);   
-    	      
-    	      boolean active= false;
-    	      for (User user2 : activeUsers) {
-				if(user2.getUsername().equals(person.getUsername())) {
-					user2.setHostIp(ip);
-					active=true;
-				}
-					
-			}
-    	      if(!active) {
-    	    	  
-    	    	  activeUsers.add(person);
-    	      }
-    	      returnMessage="ACTIVE";
-    	      
-    	        
-    	 }else {
-    		 returnMessage="NOUSER";
-    	 }
-    	
-    	
-    	return returnMessage;
-    }
-    
-    */
-    
+      
     
     @GET
     @Path("/getActive")

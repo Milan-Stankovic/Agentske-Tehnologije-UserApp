@@ -28,6 +28,7 @@ import dbClasses.UserDatabase;
 import model.Friendship;
 import model.Group;
 import model.User;
+import rest.UserRest;
 import rest.dto.ErrorDTO;
 
 
@@ -47,6 +48,9 @@ public class PrimalacQueueMDB implements MessageListener {
 	
 	@Inject
 	private GroupDatabase groupDatabase;
+	
+	@Inject
+	private UserRest userRest;
 
 
 	public void onMessage(Message msg) {
@@ -80,6 +84,9 @@ public class PrimalacQueueMDB implements MessageListener {
 			case REMOVE_USER_GROUP:
 				String[] niz = ((String)aclMessage.getContent()).split("----");
 				removeUser(aclMessage.getInfo(), niz[0], niz[1]);
+				break;
+			case LOGIN:
+				
 				break;
 
 			default:
@@ -298,7 +305,7 @@ public class PrimalacQueueMDB implements MessageListener {
 
             //TODO notify other users about user that left
 
-			new JMSQueue(new jmsDTO("ADDED", JMSStatus.ADD_USER, found));//TODO CHECK
+			new JMSQueue(new jmsDTO(toAdd.getUsername(), JMSStatus.ADD_USER, found));//TODO CHECK
         }
     }
 	
@@ -334,12 +341,14 @@ public class PrimalacQueueMDB implements MessageListener {
             }
             //notifying
 
-            new JMSQueue(new jmsDTO("KICKED", JMSStatus.REMOVE_USER_GROUP, found));
+            new JMSQueue(new jmsDTO(userId, JMSStatus.REMOVE_USER_GROUP, found));
         }
     	else {
     		new JMSQueue(new jmsDTO("ERROR", JMSStatus.ERROR, "No authoriy"));
     	}
 }
+	
+	
 
 	
 	
