@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import javax.ejb.LocalBean;
+import javax.ejb.Singleton;
 import javax.ejb.Stateful;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
@@ -34,7 +35,7 @@ import rest.dto.ErrorDTO;
 
 @LocalBean
 @Path("/users")
-@Stateful
+@Singleton
 public class UserRest implements UserRestRemote {
 
     @Inject
@@ -114,7 +115,12 @@ public class UserRest implements UserRestRemote {
 	      Friendship friend = gson.fromJson(doc.toJson(), Friendship.class);
 	      for (User u : activeUsers) {
 	    	  System.out.println("Ima aktivnih!!");
-	    	  if( !u.getUsername().equals(userName) && (u.getUsername().equals(friend.getReciever()) ||u.getUsername().equals(friend.getSender()) )) {
+	    	  System.out.println("RECI : " +friend.getReciever());
+	    	  System.out.println("SEND : " +friend.getSender());
+	    	  System.out.println("KORISNIK : "+u.getUsername());
+	    	  
+	    	  if(!u.getUsername().equals(userName)) {
+	    	  if( u.getUsername().equals(friend.getReciever()) ||u.getUsername().equals(friend.getSender()) ) {
 	    		  System.out.println("I CAK IH UPISUJEM, ZAMISLI");
 	    		  String tip = "LOGIN";
 	    		  
@@ -132,6 +138,7 @@ public class UserRest implements UserRestRemote {
 	    		  
 	    		  
 	    		  
+	    	  	}
 	    	  }
 			
 	      }

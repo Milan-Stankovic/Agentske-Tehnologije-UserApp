@@ -20,6 +20,7 @@ import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter.GeneratorSettings;
 
 import dbClasses.FriendshipDatabase;
 import dbClasses.UserDatabase;
@@ -50,10 +51,14 @@ public class FriendshipRest implements FriendshipRestRemote {
         Document foundSender = (Document) userDatabase.getCollection().find(new Document("username", newFriendship.getSender())).first();
         Document foundReciver = (Document) userDatabase.getCollection().find(new Document("username", newFriendship.getReciever())).first();   
         
+        
+        System.out.println("IZNAD IFA SAM");
         if(found!=null||foundSender==null||foundReciver==null){
+        	System.out.println("U IFU SAM");
             return Response.status(Response.Status.CONFLICT).entity(new ErrorDTO("Friendship entry already exists. Or nonexistant users.")).build();
         }
         else{
+        	System.out.println("U ELSU SAM");
             ObjectMapper mapper = new ObjectMapper();
             String json = null;
             try {
@@ -63,10 +68,16 @@ public class FriendshipRest implements FriendshipRestRemote {
                 //notifying
                 String hostIp = (String)foundReciver.get("hostIp");
                 
+                System.out.println("GADJAM: "+
+						"http://" + hostIp + ":8096/ChatApp/rest/notify/"+(String)foundReciver.get("username")+"/notifyFriendshipStart/friendship/"+newFriendship.getId());
+                
+                
+                System.out.println(newFriendship.getSender()+newFriendship.getReciever()+newFriendship.getId());
+                
                 ResteasyClient client = new ResteasyClientBuilder().build();
 				ResteasyWebTarget target = client.target(
-						"http://" + hostIp + ":8096/ChatApp/notify/"+(String)foundReciver.get("username")+"/notifyFriendshipStart");
-				Response response = target.request(MediaType.APPLICATION_JSON).post(Entity.entity(newFriendship, MediaType.APPLICATION_JSON));
+						"http://" + hostIp + ":8096/ChatApp/rest/notify/"+(String)foundReciver.get("username")+"/notifyFriendshipStart/friendship/"+newFriendship.getId());
+				Response response = target.request().get();
                 //notfying
 
                 return Response.status(Response.Status.OK).entity(newFriendship).build();
@@ -82,6 +93,7 @@ public class FriendshipRest implements FriendshipRestRemote {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response deleteFriendship(Friendship toDelete) {
+    	System.out.println("USO JE U DELETE FRIENDSHIP!!");
         Document searchBy = new Document();
         searchBy.append("sender", toDelete.getSender());
         searchBy.append("reciever", toDelete.getReciever());
@@ -93,21 +105,24 @@ public class FriendshipRest implements FriendshipRestRemote {
         if(found==null){
             return Response.status(Response.Status.NOT_FOUND).entity(new ErrorDTO("Friendship not found.")).build();
         }else{
+        	System.out.println("uso je u elfse delete friensshipa");
             friendDatabase.getCollection().deleteOne(found);
 
             //notifying
             String hostIp = (String)foundReciver.get("hostIp");
-            
+            System.out.println("saljem zahteve da notifajuejm xd: "+"http://" + hostIp + ":8096/ChatApp/rest/notify/"+(String)foundReciver.get("username")+"/notifyFriendshipEnd");
             ResteasyClient client = new ResteasyClientBuilder().build();
 			ResteasyWebTarget target = client.target(
-					"http://" + hostIp + ":8096/ChatApp/notify/"+(String)foundReciver.get("username")+"/notifyFriendshipEnd");
+					"http://" + hostIp + ":8096/ChatApp/rest/notify/"+(String)foundReciver.get("username")+"/notifyFriendshipEnd");
 			Response response = target.request(MediaType.APPLICATION_JSON).post(Entity.entity(toDelete, MediaType.APPLICATION_JSON));
 			
 			hostIp = (String)foundSender.get("hostIp");
             
+			
+			System.out.println("saljem zahteve da notifajuejm xd: "+"http://" + hostIp + ":8096/ChatApp/rest/notify/"+(String)foundSender.get("username")+"/notifyFriendshipEnd");
             ResteasyClient client1 = new ResteasyClientBuilder().build();
 			ResteasyWebTarget target1 = client.target(
-					"http://" + hostIp + ":8096/ChatApp/notify/"+(String)foundSender.get("username")+"/notifyFriendshipEnd");
+					"http://" + hostIp + ":8096/ChatApp/rest/notify/"+(String)foundSender.get("username")+"/notifyFriendshipEnd");
 			Response response1 = target.request(MediaType.APPLICATION_JSON).post(Entity.entity(toDelete, MediaType.APPLICATION_JSON));
             //notifying
 

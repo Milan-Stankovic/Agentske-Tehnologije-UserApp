@@ -96,7 +96,7 @@ public class GroupRest implements GroupRestRemote {
                     
                     ResteasyClient client = new ResteasyClientBuilder().build();
         			ResteasyWebTarget target = client.target(
-        					"http://" + hostIp + ":8096/ChatApp/notify/"+u.getUsername()+"/notifyNewGroup");
+        					"http://" + hostIp + ":8096/ChatApp/rest/notify/"+u.getUsername()+"/notifyNewGroup");
         			Response response1 = target.request(MediaType.APPLICATION_JSON).post(Entity.entity(toCreate, MediaType.APPLICATION_JSON));
                 }
                 //notifying
@@ -128,7 +128,7 @@ public class GroupRest implements GroupRestRemote {
                 
                 ResteasyClient client = new ResteasyClientBuilder().build();
     			ResteasyWebTarget target = client.target(
-    					"http://" + hostIp + ":8096/ChatApp/notify/"+u.getUsername()+"/notifyEndGroup");
+    					"http://" + hostIp + ":8096/ChatApp/rest/notify/"+u.getUsername()+"/notifyEndGroup");
     			Response response1 = target.request(MediaType.APPLICATION_JSON).post(Entity.entity(group, MediaType.APPLICATION_JSON));
             }
 
@@ -171,7 +171,7 @@ public class GroupRest implements GroupRestRemote {
                 
                 ResteasyClient client = new ResteasyClientBuilder().build();
     			ResteasyWebTarget target = client.target(
-    					"http://" + hostIp + ":8096/ChatApp/notify/"+u.getUsername()+"/notifyNewGroupMember");
+    					"http://" + hostIp + ":8096/ChatApp/rest/notify/"+u.getUsername()+"/notifyNewGroupMember");
     			Response response1 = target.request(MediaType.APPLICATION_JSON).post(Entity.entity(found, MediaType.APPLICATION_JSON));
             }
             
@@ -193,6 +193,7 @@ public class GroupRest implements GroupRestRemote {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response removeUser(@PathParam("groupId") String groupId, @PathParam("userId") String userId, @PathParam("sendingId") String sendingId) {
+    	System.out.println("USO U USERAPP SIDE");
     		Document searchBy = new Document();
 	        searchBy.put("id", groupId);
 	
@@ -201,10 +202,11 @@ public class GroupRest implements GroupRestRemote {
 	        Document foundSender = (Document) userDatabase.getCollection().find(new Document("username", sendingId)).first();
 	        
 	        if(found==null||foundSender==null||foundUser==null){
+	        	System.out.println("USO U IF");
 	            return Response.status(Response.Status.NOT_FOUND).entity(new ErrorDTO("Group, user or admin not found.")).build();
 	        }
-        	else if(sendingId==userId||found.get("admin").equals(sendingId)){
-	
+        	else if(sendingId.equals(userId)||found.get("admin").equals(sendingId)){
+        		System.out.println("USO U ELSE");
 	            Document updateBSON = new Document();
 	            updateBSON.put("username", userId);
 
@@ -215,14 +217,18 @@ public class GroupRest implements GroupRestRemote {
 	            Gson gson = new Gson();
 	      	     Group group = gson.fromJson(found.toJson(), Group.class);   
 	              
+	      	     
+	      	   System.out.println("USO U PRE USERA");
 	            //notifying
                 for(User u:group.getUsers()) {
                 	String hostIp = u.getHostIp();
+                	
+                	System.out.println("USO U USERE I GADJA: "+"http://" + hostIp + ":8096/ChatApp/rest/notify/"+u.getUsername()+"/notifyRemovedUser");
                     
                     ResteasyClient client = new ResteasyClientBuilder().build();
         			ResteasyWebTarget target = client.target(
-        					"http://" + hostIp + ":8096/ChatApp/notify/"+u.getUsername()+"/notifyRemovedUser");
-        			Response response1 = target.request(MediaType.APPLICATION_JSON).post(Entity.entity(found, MediaType.APPLICATION_JSON));
+        					"http://" + hostIp + ":8096/ChatApp/rest/notify/"+u.getUsername()+"/notifyRemovedUser");
+        			Response response1 = target.request(MediaType.APPLICATION_JSON).post(Entity.entity(group, MediaType.APPLICATION_JSON));
                 }
                 //notifying
 	
