@@ -21,6 +21,7 @@ import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 
 import dbClasses.FriendshipDatabase;
 import dbClasses.GroupDatabase;
@@ -58,23 +59,24 @@ public class PrimalacQueueMDB implements MessageListener {
 		ObjectMessage omsg = (ObjectMessage) msg;
 		try {
 			jmsDTO aclMessage = (jmsDTO) omsg.getObject();
-			
+			System.out.println(aclMessage.getStatus()+"---OVDEEE---");
 			switch (aclMessage.getStatus()) {
 			case NEW_FRIENDSHIP:
 				
 				newFriendships((Friendship)aclMessage.getContent());
 				break;
 			case DELETE_FRIENDSHIP:
-				System.out.println("Usao sam u DELETEFRIENDSHIP!!!");
+				
 				deleteFriendship((Friendship)aclMessage.getContent());	
 				break;
 			case PUT_FRIENDSHIP:
 				updateFriendshipStatus((Friendship)aclMessage.getContent());
 				break;
 			case GET_GROUP:
-				getGroup((String)aclMessage.getContent());
+				//getGroup((Group)aclMessage.getContent());
 				break;
 			case NEW_GROUP:
+				System.out.println("Usao sam u NEW GROUP!!!");
 				createGroup((Group)aclMessage.getContent());
 				break;
 			case DELETE_GROUP:
@@ -156,21 +158,23 @@ public class PrimalacQueueMDB implements MessageListener {
 			ResteasyWebTarget target = client.target(
 					"http://" + hostIp + ":8096/ChatApp/notify/"+(String)foundReciver.get("username")+"/notifyFriendshipEnd");
 			
-			System.out.println("Prva IP adresa: "+
-					"http://" + hostIp + ":8096/ChatApp/notify/"+(String)foundReciver.get("username")+"/notifyFriendshipEnd");
+			//System.out.println("Prva IP adresa: "+
+			//		"http://" + hostIp + ":8096/ChatApp/notify/"+(String)foundReciver.get("username")+"/notifyFriendshipEnd");
 			
 			Response response = target.request(MediaType.APPLICATION_JSON).post(Entity.entity(toDelete, MediaType.APPLICATION_JSON));
+			
+			client.close();
 			
 			hostIp = (String)foundSender.get("hostIp");
 			
             ResteasyClient client1 = new ResteasyClientBuilder().build();
-			ResteasyWebTarget target1 = client.target(
+			ResteasyWebTarget target1 = client1.target(
 					"http://" + hostIp + ":8096/ChatApp/notify/"+(String)foundSender.get("username")+"/notifyFriendshipEnd");
 			
-			System.out.println("Prva IP adresa: http://" + hostIp + ":8096/ChatApp/notify/"+(String)foundSender.get("username")+"/notifyFriendshipEnd");
+			//System.out.println("Prva IP adresa: http://" + hostIp + ":8096/ChatApp/notify/"+(String)foundSender.get("username")+"/notifyFriendshipEnd");
 			
-			Response response1 = target.request(MediaType.APPLICATION_JSON).post(Entity.entity(toDelete, MediaType.APPLICATION_JSON));
-			
+			Response response1 = target1.request(MediaType.APPLICATION_JSON).post(Entity.entity(toDelete, MediaType.APPLICATION_JSON));
+			client1.close();
 
 			
             //notifying
@@ -206,7 +210,7 @@ public class PrimalacQueueMDB implements MessageListener {
 			Response response1 = target.request(MediaType.APPLICATION_JSON).post(Entity.entity(toUpdate, MediaType.APPLICATION_JSON));
             //notifying
 
-			new JMSQueue(new jmsDTO("UPDATED", JMSStatus.DELETE_FRIENDSHIP, toUpdate));
+			new JMSQueue(new jmsDTO("UPDATED", JMSStatus.PUT_FRIENDSHIP, toUpdate));
         }
 
     }
@@ -259,20 +263,22 @@ public class PrimalacQueueMDB implements MessageListener {
         searchBy.put("id", toDelete.getId());
 
         Document found = (Document)groupDatabase.getCollection().find(searchBy).first();
+        Gson gson = new Gson();
+ 	     Group group = gson.fromJson(found.toJson(), Group.class);   
         if(found == null){
         	new JMSQueue(new jmsDTO("ERROR", JMSStatus.ERROR, "Group not found."));
         }else{
             groupDatabase.getCollection().deleteOne(found);
 
-            for(User u:toDelete.getUsers()) {
+            for(User u:group.getUsers()) {
             	String hostIp = u.getHostIp();
                 
                 ResteasyClient client = new ResteasyClientBuilder().build();
     			ResteasyWebTarget target = client.target(
     					"http://" + hostIp + ":8096/ChatApp/notify/"+u.getUsername()+"/notifyEndGroup");
-    			Response response1 = target.request(MediaType.APPLICATION_JSON).post(Entity.entity(toDelete, MediaType.APPLICATION_JSON));
+    			Response response1 = target.request(MediaType.APPLICATION_JSON).post(Entity.entity(group, MediaType.APPLICATION_JSON));
             }
-            new JMSQueue(new jmsDTO("DELETED", JMSStatus.DELETE_GROUP, toDelete));
+            new JMSQueue(new jmsDTO("DELETED", JMSStatus.DELETE_GROUP, group));
         }
 
     }

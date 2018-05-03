@@ -23,6 +23,7 @@ import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 
 import dbClasses.GroupDatabase;
 import dbClasses.UserDatabase;
@@ -101,21 +102,23 @@ public class GroupRest implements GroupRestRemote {
         searchBy.put("id", toDelete.getId());
 
         Document found = (Document)groupDatabase.getCollection().find(searchBy).first();
+        Gson gson = new Gson();
+	     Group group = gson.fromJson(found.toJson(), Group.class);   
         if(found == null){
             return Response.status(Response.Status.NOT_FOUND).entity(new ErrorDTO("Group not found.")).build();
         }else{
             groupDatabase.getCollection().deleteOne(found);
 
-            for(User u:toDelete.getUsers()) {
+            for(User u:group.getUsers()) {
             	String hostIp = u.getHostIp();
                 
                 ResteasyClient client = new ResteasyClientBuilder().build();
     			ResteasyWebTarget target = client.target(
     					"http://" + hostIp + ":8096/ChatApp/notify/"+u.getUsername()+"/notifyEndGroup");
-    			Response response1 = target.request(MediaType.APPLICATION_JSON).post(Entity.entity(toDelete, MediaType.APPLICATION_JSON));
+    			Response response1 = target.request(MediaType.APPLICATION_JSON).post(Entity.entity(group, MediaType.APPLICATION_JSON));
             }
 
-            return Response.status(Response.Status.OK).entity(toDelete).build();
+            return Response.status(Response.Status.OK).entity(group).build();
         }
 
     }
