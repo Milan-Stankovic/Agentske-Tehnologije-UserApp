@@ -1,27 +1,36 @@
 package rest;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
+import java.util.ArrayList;
+import java.util.Arrays;
 
-import model.User;
-import rest.dto.ErrorDTO;
-import dbClasses.UserDatabase;
+import javax.ejb.LocalBean;
+import javax.ejb.Stateful;
+import javax.inject.Inject;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
 import org.bson.Document;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 
-import javax.ejb.LocalBean;
-import javax.ejb.Stateful;
-import javax.inject.Inject;
-import javax.ws.rs.*;
-import javax.ws.rs.client.Entity;
-import javax.ejb.Stateless;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.mongodb.client.FindIterable;
 
-import java.util.ArrayList;
+import dbClasses.FriendshipDatabase;
+import dbClasses.UserDatabase;
+import model.Friendship;
+import model.FriendshipStatus;
+import model.User;
+import rest.dto.ErrorDTO;
 
 @LocalBean
 @Path("/users")
@@ -33,6 +42,9 @@ public class UserRest implements UserRestRemote {
 
 
     private ArrayList<User> activeUsers = new ArrayList<User>();
+    
+    @Inject 
+    private FriendshipDatabase friendDb;
     
     
 
@@ -64,6 +76,68 @@ public class UserRest implements UserRestRemote {
              return Response.status(Response.Status.OK).entity(activeUsers).build();
          
     }
+    
+    
+    private void alertFriends(String userName, boolean remove) {
+		System.out.println("ALERTUJEM!!!!");
+	
+		
+		Document or1 = new Document(
+		  		  "$and", Arrays.asList(
+		  		    new Document("sender", userName),
+		  		    new Document("status", FriendshipStatus.ACCEPTED.toString())
+		  		  )
+		  		);
+		  	
+		  	
+			Document or2 = new Document(
+			  		  "$and", Arrays.asList(
+			  		    new Document("reciever", userName),
+			  		    new Document("status", FriendshipStatus.ACCEPTED.toString())
+			  		  )
+			  		);
+			
+			Document query = new Document(
+			  		  "$or", Arrays.asList(
+			  		  or1,
+			  		  or2
+			  		  )
+			  		);
+			
+			System.out.println(query);
+			
+			Gson gson= new Gson();
+			 @SuppressWarnings("unchecked")
+	  	     FindIterable<Document> docs = friendDb.getCollection().find(query);//valjda sortira .sort(new Document("created_at",1))
+  	     for (Document doc : docs) {
+  	    	 System.out.println("Pronasao prijatelja!!!");
+	      Friendship friend = gson.fromJson(doc.toJson(), Friendship.class);
+	      for (User u : activeUsers) {
+	    	  System.out.println("Ima aktivnih!!");
+	    	  if(u.getUsername().equals(friend.getReciever())) {
+	    		  
+	    		  String tip = "LOGIN";
+	    		  
+	    		  if(remove)
+	    			  tip="LOGOUT";
+	    		  
+	    		  ResteasyClient client = new ResteasyClientBuilder().build();
+					
+					ResteasyWebTarget target = client.target(
+							"http://" + u.getHostIp() + ":8096/ChatApp/users/notifyFriend/"+userName +"/firend/"+u.getUsername()+"/"+tip);
+					
+					
+					Response response = target.request().get();
+	    		  
+	    		  
+	    		  
+	    	  }
+			
+	      }
+  	    }
+
+		
+	}
     
     
 
@@ -114,6 +188,9 @@ public class UserRest implements UserRestRemote {
 						"http://" + user.getHostIp() + ":8096/ChatApp/users/addAllUsers/");
 				
 				Response response = target.request().post(Entity.entity(activeUsers, MediaType.APPLICATION_JSON));
+				
+				
+				alertFriends(user.getUsername(), false);
 			// Nemam pojma da li ce ono raditi xD
                 
                 s="LOGGEDIN";
@@ -146,6 +223,8 @@ public class UserRest implements UserRestRemote {
 
         				Response response = target.request(MediaType.APPLICATION_JSON).delete();
             			String alive = response.readEntity(String.class);
+            			
+            			alertFriends(user.getUsername(), true);
             
 					}
                     break;
