@@ -26,10 +26,10 @@ public class JMSQueue {
 			Context context = new InitialContext();
 			
 			ConnectionFactory cf = (ConnectionFactory) context.lookup("java:jboss/exported/jms/RemoteConnectionFactory");
-		    final Queue queue = (Queue) context.lookup("java:jboss/exported/jms/queue/mojQueue");
+		    final Queue queue = (Queue) context.lookup("java:jboss/exported/jms/queue/mojQueue1");
 		    context.close();
 				   
-			Connection connection = cf.createConnection();//"guest", "guestguest");
+			Connection connection = cf.createConnection();
 			final Session session = connection.createSession(false,
 					Session.AUTO_ACKNOWLEDGE);
 
