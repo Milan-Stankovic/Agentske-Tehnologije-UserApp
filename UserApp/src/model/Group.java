@@ -52,7 +52,7 @@ public class Group {
     }
 
     public void setId(String id) {
-        this.id = id;
+        this.id = UUID.randomUUID().toString();
     }
 
     public String getName() {

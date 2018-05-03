@@ -1,5 +1,7 @@
 package model;
 
+import java.util.UUID;
+
 import javax.persistence.Id;
 
 public class Friendship {
@@ -26,7 +28,7 @@ public class Friendship {
 
 
 	public void setId(String id) {
-		this.id = id;
+		this.id = UUID.randomUUID().toString();
 	}
 
 
