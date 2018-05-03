@@ -30,6 +30,7 @@ import dbClasses.UserDatabase;
 import model.Group;
 import model.User;
 import rest.dto.ErrorDTO;
+import sun.text.resources.cldr.ur.FormatData_ur_IN;
 
 @LocalBean
 @Path("/groups")
@@ -41,6 +42,19 @@ public class GroupRest implements GroupRestRemote {
     
     @Inject
     UserDatabase userDatabase;
+    
+    @Inject
+    UserRest actives;
+    
+    public String getIpAt(String username) {
+    	Document searchBy = new Document();
+        searchBy.put("username", username);
+        
+        Document found = (Document)userDatabase.getCollection().find(searchBy).first();
+        
+        return found.getString("hostIp");
+        
+    }
 
     @GET
     @Path("/group/{groupId}")
@@ -78,7 +92,7 @@ public class GroupRest implements GroupRestRemote {
                 groupDatabase.getCollection().insertOne(Document.parse(json));
                 //notifying
                 for(User u:toCreate.getUsers()) {
-                	String hostIp = u.getHostIp();
+                	String hostIp = getIpAt(u.getUsername());
                     
                     ResteasyClient client = new ResteasyClientBuilder().build();
         			ResteasyWebTarget target = client.target(
@@ -110,7 +124,7 @@ public class GroupRest implements GroupRestRemote {
             groupDatabase.getCollection().deleteOne(found);
 
             for(User u:group.getUsers()) {
-            	String hostIp = u.getHostIp();
+            	String hostIp = getIpAt(u.getUsername());
                 
                 ResteasyClient client = new ResteasyClientBuilder().build();
     			ResteasyWebTarget target = client.target(
@@ -153,7 +167,7 @@ public class GroupRest implements GroupRestRemote {
    	     Group group = gson.fromJson(found.toJson(), Group.class);   
            
            for(User u:group.getUsers()) {
-            	String hostIp = u.getHostIp();
+        	   String hostIp = getIpAt(u.getUsername());
                 
                 ResteasyClient client = new ResteasyClientBuilder().build();
     			ResteasyWebTarget target = client.target(
