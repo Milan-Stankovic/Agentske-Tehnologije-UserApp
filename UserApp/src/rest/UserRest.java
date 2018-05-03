@@ -145,7 +145,7 @@ public class UserRest implements UserRestRemote {
 				ResteasyWebTarget target = client.target(
 						"http://" + user.getHostIp() + ":8096/ChatApp/users/addAllUsers/");
 				
-				Response response = target.request().post(Entity.entity(activeUsers, "application/vnd.com.demo.user-management.user+xml;charset=UTF-8;version=1"));
+				Response response = target.request().post(Entity.entity(activeUsers, MediaType.APPLICATION_JSON));
 			// Nemam pojma da li ce ono raditi xD
                 
                 s="LOGGEDIN";
