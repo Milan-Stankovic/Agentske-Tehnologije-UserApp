@@ -199,6 +199,9 @@ public class UserRest implements UserRestRemote {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
     public String register(User user) {
+    	
+    	System.out.println("PA JA SAM ZAPRAVO U USERAPPU");
+    	
         String s = "";
         Document found = (Document) userDatabase.getCollection().find(new Document("username", user.getUsername())).first();
         if(found == null){
