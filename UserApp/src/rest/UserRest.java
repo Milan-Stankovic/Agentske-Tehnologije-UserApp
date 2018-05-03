@@ -114,17 +114,18 @@ public class UserRest implements UserRestRemote {
 	      Friendship friend = gson.fromJson(doc.toJson(), Friendship.class);
 	      for (User u : activeUsers) {
 	    	  System.out.println("Ima aktivnih!!");
-	    	  if(u.getUsername().equals(friend.getReciever())) {
-	    		  
+	    	  if( !u.getUsername().equals(userName) && (u.getUsername().equals(friend.getReciever()) ||u.getUsername().equals(friend.getSender()) )) {
+	    		  System.out.println("I CAK IH UPISUJEM, ZAMISLI");
 	    		  String tip = "LOGIN";
 	    		  
 	    		  if(remove)
 	    			  tip="LOGOUT";
 	    		  
 	    		  ResteasyClient client = new ResteasyClientBuilder().build();
-					
+					System.out.println(
+							"http://" + u.getHostIp() + ":8096/ChatApp/rest/users/notifyFriend/"+userName +"/firend/"+u.getUsername()+"/"+tip);
 					ResteasyWebTarget target = client.target(
-							"http://" + u.getHostIp() + ":8096/ChatApp/users/notifyFriend/"+userName +"/firend/"+u.getUsername()+"/"+tip);
+							"http://" + u.getHostIp() + ":8096/ChatApp/rest/users/notifyFriend/"+userName +"/firend/"+u.getUsername()+"/"+tip);
 					
 					
 					Response response = target.request().get();
@@ -155,6 +156,7 @@ public class UserRest implements UserRestRemote {
                     temp.setHostIp(user.getHostIp());
                 }
             }
+            System.out.println(s+"SRAMOTA JEBENA");
             if(s.equals("")){
             	
             	if(!activeUsers.isEmpty()) {
@@ -189,7 +191,7 @@ public class UserRest implements UserRestRemote {
 				
 				Response response = target.request().post(Entity.entity(activeUsers, MediaType.APPLICATION_JSON));
 				
-				
+				System.out.println("Pokrecem alert na prijatelje!!!");
 				alertFriends(user.getUsername(), false);
 			// Nemam pojma da li ce ono raditi xD
                 
