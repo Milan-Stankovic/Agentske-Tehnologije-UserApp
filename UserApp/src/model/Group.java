@@ -1,10 +1,12 @@
 package model;
 
 import javax.persistence.Id;
+
+import java.io.Serializable;
 import java.util.List;
 import java.util.UUID;
 
-public class Group {
+public class Group implements Serializable{
 
     @Id
     private String id;

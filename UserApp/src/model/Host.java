@@ -1,8 +1,10 @@
 package model;
 
+import java.io.Serializable;
+
 import javax.persistence.Id;
 
-public class Host {
+public class Host implements Serializable{
     @Id
     private String id;
     private String address;

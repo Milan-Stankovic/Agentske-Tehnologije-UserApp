@@ -5,10 +5,11 @@ import javax.persistence.Id;
 import com.google.gson.Gson;
 import com.sun.mail.imap.protocol.UID;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.UUID;
 
-public class Message {
+public class Message implements Serializable{
 
     @Id
     private String id;

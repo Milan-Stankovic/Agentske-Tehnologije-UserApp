@@ -54,16 +54,18 @@ public class PrimalacQueueMDB implements MessageListener {
 
 
 	public void onMessage(Message msg) {
-		log.info("UserApp");
+		log.info("UserApp - Primio poruku!!!");
 		ObjectMessage omsg = (ObjectMessage) msg;
 		try {
 			jmsDTO aclMessage = (jmsDTO) omsg.getObject();
 			
 			switch (aclMessage.getStatus()) {
 			case NEW_FRIENDSHIP:
+				
 				newFriendships((Friendship)aclMessage.getContent());
 				break;
 			case DELETE_FRIENDSHIP:
+				System.out.println("Usao sam u DELETEFRIENDSHIP!!!");
 				deleteFriendship((Friendship)aclMessage.getContent());	
 				break;
 			case PUT_FRIENDSHIP:
@@ -94,7 +96,7 @@ public class PrimalacQueueMDB implements MessageListener {
 			}
 			
 		}catch (Exception e) {
-			// TODO: handle exception
+			e.printStackTrace();
 		}
 	}
 	
@@ -153,14 +155,24 @@ public class PrimalacQueueMDB implements MessageListener {
             ResteasyClient client = new ResteasyClientBuilder().build();
 			ResteasyWebTarget target = client.target(
 					"http://" + hostIp + ":8096/ChatApp/notify/"+(String)foundReciver.get("username")+"/notifyFriendshipEnd");
+			
+			System.out.println("Prva IP adresa: "+
+					"http://" + hostIp + ":8096/ChatApp/notify/"+(String)foundReciver.get("username")+"/notifyFriendshipEnd");
+			
 			Response response = target.request(MediaType.APPLICATION_JSON).post(Entity.entity(toDelete, MediaType.APPLICATION_JSON));
 			
 			hostIp = (String)foundSender.get("hostIp");
-            
+			
             ResteasyClient client1 = new ResteasyClientBuilder().build();
 			ResteasyWebTarget target1 = client.target(
 					"http://" + hostIp + ":8096/ChatApp/notify/"+(String)foundSender.get("username")+"/notifyFriendshipEnd");
+			
+			System.out.println("Prva IP adresa: http://" + hostIp + ":8096/ChatApp/notify/"+(String)foundSender.get("username")+"/notifyFriendshipEnd");
+			
 			Response response1 = target.request(MediaType.APPLICATION_JSON).post(Entity.entity(toDelete, MediaType.APPLICATION_JSON));
+			
+
+			
             //notifying
 
 			new JMSQueue(new jmsDTO("DELETED", JMSStatus.DELETE_FRIENDSHIP, toDelete));
