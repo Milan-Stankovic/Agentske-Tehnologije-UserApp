@@ -59,10 +59,9 @@ public class PrimalacQueueMDB implements MessageListener {
 		ObjectMessage omsg = (ObjectMessage) msg;
 		try {
 			jmsDTO aclMessage = (jmsDTO) omsg.getObject();
-			System.out.println(aclMessage.getStatus()+"---OVDEEE---");
 			switch (aclMessage.getStatus()) {
 			case NEW_FRIENDSHIP:
-				
+				System.out.println("USERAPP SIDE NEW FRIEND!!!");
 				newFriendships((Friendship)aclMessage.getContent());
 				break;
 			case DELETE_FRIENDSHIP:
