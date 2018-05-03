@@ -7,8 +7,14 @@ public class Host {
     private String id;
     private String address;
     private String alias;
+    
+    
 
-    public Host(String address) {
+    public Host() {
+		super();
+	}
+
+	public Host(String address) {
         this.address = address;
     }
 
