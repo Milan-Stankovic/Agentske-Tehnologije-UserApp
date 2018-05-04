@@ -172,7 +172,7 @@ public class UserRest implements UserRestRemote {
             			ResteasyClient client = new ResteasyClientBuilder().build();
         				
         				ResteasyWebTarget target = client.target(
-        						"http://" + temp.getHostIp() + ":8096/ChatApp/users/addActive/"+temp.getUsername() +"/ip/"+user.getHostIp());
+        						"http://" + temp.getHostIp() + ":8096/ChatApp/rest/users/addActive/"+temp.getUsername() +"/ip/"+user.getHostIp());
             			
         				Response response = target.request(MediaType.APPLICATION_JSON).get();
             			String alive = response.readEntity(String.class);
